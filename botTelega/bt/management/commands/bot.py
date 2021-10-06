@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from telegram import Bot, Update
-from telegram.ext import CallbackContext, Filters, MessageHandler, Updater
+from telegram.ext import CallbackContext, Filters, MessageHandler, Updater, CommandHandler
 from telegram.utils.request import Request
 
 from bt.models import Message, Profile
@@ -18,6 +18,7 @@ def lod_errors(f):
             error_message = f'Произошла ошибка:{e}'
             print(error_message)
             raise e
+
     return inner
 
 
@@ -27,20 +28,35 @@ def do_echo(update: Update, context: CallbackContext):
     text = update.message.text
 
     p, _ = Profile.objects.get_or_create(
-        external_id = chat_id,
-        defaults = {
-            'name':update.message.from_user.username,
+        external_id=chat_id,
+        defaults={
+            'name': update.message.from_user.username,
         }
-
     )
-    Message(
+    m = Message(
         profile=p,
         text=text,
-    ).save()
+    )
+    m.save()
 
-    reply_text = "Ваш ID = {}\n\n{}".format(chat_id, text)
+    reply_text = f'Ваш ID = {chat_id}\nMessage ID = {m.pk}\n{text}'
     update.message.reply_text(
-        text=reply_text
+        text=reply_text,
+    )
+
+
+@lod_errors
+def do_count(update: Update, context: CallbackContext):
+    chat_id = update.message.chat_id
+    p, _ = Profile.objects.get_or_create(
+        external_id=chat_id,
+        defaults={
+            'name': update.message.from_user.username,
+        }
+    )
+    count = Message.objects.filter(profile=p).count()
+    update.message.reply_text(
+        text=f'У вас {count} сообщений',
     )
 
 
@@ -65,9 +81,14 @@ class Command(BaseCommand):
             bot=bot,
             use_context=True,
         )
+        message_handler2 = CommandHandler('count', do_count)
+        updater.dispatcher.add_handler(message_handler2)
+
         message_handler = MessageHandler(Filters.text, do_echo)
         updater.dispatcher.add_handler(message_handler)
 
-        #3 - запустить бесконечную обработку
+
+
+        # 3 - запустить бесконечную обработку
         updater.start_polling()
         updater.idle()
