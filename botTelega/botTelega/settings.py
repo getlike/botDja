@@ -118,4 +118,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #настройки бота
 TOKEN = '1436477397:AAHKoiFou04W7i8qPRQO_I3k4a9d9Fgt9nY'
 
-PROXY_URL = 'https://exp.proxy.digitalresistance.dog'
+PROXY_URL = 'https://proxy.unlockgram.it:5061'

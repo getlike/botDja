@@ -4,9 +4,10 @@ from django.db import models
 class Profile(models.Model):
     external_id = models.PositiveIntegerField(
         verbose_name='ID пользователя в соцсети',
+        unique=True,
     )
     name = models.TextField(
-        'Имя пользователя',
+        verbose_name='Имя пользователя',
     )
 
     def __str__(self):

@@ -10,3 +10,5 @@ sqlparse==0.4.2
 tornado==6.1
 tzdata==2021.2.post0
 tzlocal==3.0
+
+https://youtu.be/s9RHzPLtYWk

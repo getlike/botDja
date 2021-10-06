@@ -18,12 +18,25 @@ def lod_errors(f):
             error_message = f'Произошла ошибка:{e}'
             print(error_message)
             raise e
+    return inner
 
 
 @lod_errors
 def do_echo(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
-    text = update.message.chat_id
+    text = update.message.text
+
+    p, _ = Profile.objects.get_or_create(
+        external_id = chat_id,
+        defaults = {
+            'name':update.message.from_user.username,
+        }
+
+    )
+    Message(
+        profile=p,
+        text=text,
+    ).save()
 
     reply_text = "Ваш ID = {}\n\n{}".format(chat_id, text)
     update.message.reply_text(
@@ -43,7 +56,7 @@ class Command(BaseCommand):
         bot = Bot(
             request=request,
             token=settings.TOKEN,
-            base_url=settings.PROXY_URL,
+            # base_url=settings.PROXY_URL,
         )
         print(bot.get_me())
 
@@ -53,3 +66,8 @@ class Command(BaseCommand):
             use_context=True,
         )
         message_handler = MessageHandler(Filters.text, do_echo)
+        updater.dispatcher.add_handler(message_handler)
+
+        #3 - запустить бесконечную обработку
+        updater.start_polling()
+        updater.idle()
