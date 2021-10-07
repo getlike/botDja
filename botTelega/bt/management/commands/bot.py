@@ -92,3 +92,5 @@ class Command(BaseCommand):
         # 3 - запустить бесконечную обработку
         updater.start_polling()
         updater.idle()
+#https://youtu.be/s9RHzPLtYWk
+
